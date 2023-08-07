@@ -1,51 +1,60 @@
-def valid(Board, i, j):
-    # check if board index is not outside
-    return i >= 0 and j >= 0 and i < len(Board) and j < len(Board[i]) \
-           and Board[i][j] == '-'
+from collections import deque
 
+def is_valid_move(board, row, col):
+    # Check if the move is within the bounds of the board and is an empty cell
+    return 0 <= row < len(board) and 0 <= col < len(board[0]) and board[row][col] == '-'
 
-answers = []  # to store the routes
+def get_direction(prev_row, prev_col, new_row, new_col):
+    if new_row == prev_row - 1:
+        return 'U'
+    elif new_row == prev_row + 1:
+        return 'D'
+    elif new_col == prev_col - 1:
+        return 'L'
+    elif new_col == prev_col + 1:
+        return 'R'
+    else:
+        return ''
 
+def solve_puzzle(board, source, destination):
+    if source == destination:
+        return [source], ''
 
-def dfs(Board, i, j, target, route):
-    # if moving is not valid
-    if not valid(Board, i, j):
-        return
-    # if we reached target
-    if (i, j) == target:
-        answers.append(route)
-        return
-    # mark current cell visited
-    Board[i][j] = '#'
-    # cal dfs in all four direction
-    if valid(Board, i - 1, j):
-        dfs(Board, i - 1, j, target, route + 'U')
-    if valid(Board, i + 1, j):
-        dfs(Board, i + 1, j, target, route + 'D')
-    if valid(Board, i, j - 1):
-        dfs(Board, i, j - 1, target, route + 'L')
-    if valid(Board, i, j + 1):
-        dfs(Board, i, j + 1, target, route + 'R')
-    # unmark the current cell
-    Board[i][j] = '-'
+    queue = deque()
+    queue.append([source])
 
+    visited = set()
+    visited.add(source)
 
-def solve_puzzle(Board, source, destination):
-    # call the function
-    dfs(Board, source[0], source[1], destination, '')
-    minlen = 1e12;
-    # calculate the minimum length
-    for i in answers:
-        minlen = min(minlen, len(i))
-    actual = []
-    # filter the minlen routes
-    for i in answers:
-        if len(i) == minlen:
-            actual.append(i)
-    # if there is no way
-    if not len(actual):
-        print(None)
-        return
-    # otherwise print the ans
-    print(len(actual))
-    print(answers[0])
+    while queue:
+        path = queue.popleft()
+        row, col = path[-1]
+
+        if (row, col) == destination:
+            # Build directions only for the correct path
+            directions = ''
+            for i in range(1, len(path)):
+                directions += get_direction(path[i-1][0], path[i-1][1], path[i][0], path[i][1])
+            return path, directions
+
+        # Check possible moves: left, right, up, down
+        moves = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+
+        for dr, dc in moves:
+            new_row, new_col = row + dr, col + dc
+            if is_valid_move(board, new_row, new_col) and (new_row, new_col) not in visited:
+                visited.add((new_row, new_col))
+                new_path = list(path)
+                new_path.append((new_row, new_col))
+                queue.append(new_path)
+
+    # If no path is found
+    return None, ''
+
+# Example usage
+board = [ ['-', '-', '-', '-', '-'], ['-', '-', '#', '-', '-'], ['-', '-', '-', '-', '-'], ['#', '-', '#', '#', '-'], ['-', '#', '-', '-', '-'] ]
+source = (0, 0)
+destination = (2, 2)
+path, directions = solve_puzzle(board, source, destination)
+print("Path:", path)
+print("Directions:", directions)
