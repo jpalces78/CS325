@@ -1,4 +1,15 @@
 def Prims(G):
+    """
+    Input:
+    G: The input graph represented as a square matrix (list of lists). G[i][j] represents the weight of the edge between
+    vertices i and j. If there is no edge between vertices i and j, the value of G[i][j] should be 0 or a special marker
+    representing infinity.
+    Output:
+    The function returns the Minimum Spanning Tree (MST) of the input graph as a list of edges.
+    Each edge is represented as a tuple (u, v, weight) where u and v are the vertices connected by the edge, and weight
+    is the weight of that edge. The MST is constructed by selecting the minimum-weight edges that connect all the
+    vertices in the graph without forming any cycles.
+    """
     num_vertices = len(G)
     visited = [False] * num_vertices
     mst = []
@@ -23,3 +34,5 @@ def Prims(G):
             visited[min_edge[1]] = True
 
     return mst
+
+
